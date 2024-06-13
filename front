@@ -1,94 +1,107 @@
 #include <stdio.h>
 #include <string.h>
+#include <curses.h>
 
 #define USERNAME "client"
 #define PASSWORD "senha123"
 #define ADMIN_USERNAME "admin"
 #define ADMIN_PASSWORD "admin123"
 
-void sucessoCadastro() {
-    printf("Cadastro realizado com sucesso! \n");
+void sucessoCadastro(WINDOW *win) {
+    wprintw(win, "Cadastro realizado com sucesso! \n");
+    wrefresh(win);
 }
 
-void adicionarProduto() {
+void adicionarProduto(WINDOW *win) {
     char produto[256];
 
-    printf("Digite o nome do produto para adicionar: \n");
-    scanf("%s", produto);
+    wprintw(win, "Digite o nome do produto para adicionar: \n");
+    wrefresh(win);
+    wgetstr(win, produto);
     // Aqui você pode adicionar o código para salvar o novo produto
 
-    printf("Produto '%s' adicionado com sucesso!\n", produto);
+    wprintw(win, "Produto '%s' adicionado com sucesso!\n", produto);
+    wrefresh(win);
 }
 
-void cadastro() {
+void cadastro(WINDOW *win) {
     char username[256];
     char senha[256];
 
-    printf("Crie um nome de usuário: \n");
-    scanf("%s", username);
-    printf("Crie uma senha: \n");
-    scanf("%s", senha);
+    wprintw(win, "Crie um nome de usuário: \n");
+    wrefresh(win);
+    wgetstr(win, username);
+    wprintw(win, "Crie uma senha: \n");
+    wrefresh(win);
+    wgetstr(win, senha);
 
     // Aqui você pode adicionar o código para salvar os novos dados de usuário
-    sucessoCadastro();
+    sucessoCadastro(win);
 }
 
-void loginCliente() {
+void loginCliente(WINDOW *win) {
     char username[256];
     char senha[256];
 
-    printf("Digite o nome de usuário: \n");
-    scanf("%s", username);
-    printf("Digite a senha: \n");
-    scanf("%s", senha);
+    wprintw(win, "Digite o nome de usuário: \n");
+    wrefresh(win);
+    wgetstr(win, username);
+    wprintw(win, "Digite a senha: \n");
+    wrefresh(win);
+    wgetstr(win, senha);
 
     if (strcmp(username, USERNAME) == 0 && strcmp(senha, PASSWORD) == 0) {
-        printf("Login de cliente realizado com sucesso!\n");
+        wprintw(win, "Login de cliente realizado com sucesso!\n");
     } else {
-        printf("Nome de usuário ou senha incorretos!\n");
+        wprintw(win, "Nome de usuário ou senha incorretos!\n");
     }
+    wrefresh(win);
 }
 
-void loginAdmin() {
+void loginAdmin(WINDOW *win) {
     char username[256];
     char senha[256];
 
-    printf("Digite o nome de usuário do administrador: \n");
-    scanf("%s", username);
-    printf("Digite a senha do administrador: \n");
-    scanf("%s", senha);
+    wprintw(win, "Digite o nome de usuário do administrador: \n");
+    wrefresh(win);
+    wgetstr(win, username);
+    wprintw(win, "Digite a senha do administrador: \n");
+    wrefresh(win);
+    wgetstr(win, senha);
 
     if (strcmp(username, ADMIN_USERNAME) == 0 && strcmp(senha, ADMIN_PASSWORD) == 0) {
-        printf("Login de administrador realizado com sucesso!\n");
-        adicionarProduto();
+        wprintw(win, "Login de administrador realizado com sucesso!\n");
+        wrefresh(win);
+        adicionarProduto(win);
     } else {
-        printf("Nome de usuário ou senha de administrador incorretos!\n");
+        wprintw(win, "Nome de usuário ou senha de administrador incorretos!\n");
+        wrefresh(win);
     }
 }
 
 int main() {
+    WINDOW *win;
     int tipoUsuario;
 
-    printf("Digite 1 para Administrador ou 2 para Cliente: \n");
-    scanf("%d", &tipoUsuario);
+    initscr(); // Inicializa a tela para uso com a biblioteca curses
+    cbreak(); // Desativa o buffer de linha, permitindo que os caracteres sejam lidos imediatamente
+    noecho(); // Desativa a exibição automática de caracteres de entrada
+    win = newwin(0, 0, 0, 0); // Cria uma nova janela
+
+    wprintw(win, "Digite 1 para Administrador ou 2 para Cliente: \n");
+    wrefresh(win);
+    wscanw(win, "%d", &tipoUsuario);
 
     if (tipoUsuario == 1) {
-        loginAdmin();
+        loginAdmin(win);
     } else if (tipoUsuario == 2) {
-        int opcao;
-        printf("Digite 1 para login ou 2 para cadastro: \n");
-        scanf("%d", &opcao);
-
-        if (opcao == 1) {
-            loginCliente();
-        } else if (opcao == 2) {
-            cadastro();
-        } else {
-            printf("Opção inválida!\n");
-        }
+        cadastro(win);
     } else {
-        printf("Tipo de usuário inválido!\n");
+        wprintw(win, "Tipo de usuário inválido!\n");
+        wrefresh(win);
     }
 
+    delwin(win); // Deleta a janela criada
+    endwin(); // Finaliza a tela curses
     return 0;
 }
