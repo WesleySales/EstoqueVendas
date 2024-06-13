@@ -73,28 +73,27 @@ void adicionarAoCarrinho(ItemCarrinho carrinho[], int *numItens, int produtoId, 
     }
 }
 
-void exibirCarrinho(ItemCarrinho carrinho[], int numItens, produto produtos[], int numProdutos, float total) {
+void exibirCarrinho(ItemCarrinho carrinho[], int numItens, produto produtos[], int numProdutos) {
     printf("Carrinho de Compras:\n\n");
+    float total=0;
+    
     for (int i = 0; i < numItens; i++) {
         int produtoId = carrinho[i].produtoId;
         int quantidade = carrinho[i].quantidade;
+		
 
         // Encontra o produto pelo ID
         for (int j = 0; j < numProdutos; j++) {
             if (produtos[j].id == produtoId) {
-            	total=produtos[j].preco * quantidade;
+            	float precoTotal = produtos[j].preco * quantidade;
                 printf("Produto: %s, Quantidade: %d, Preço Unitário: %.2f, Preço Total: %.2f\n",
-                       produtos[j].nome, quantidade, produtos[j].preco, total);
-                       break;
-                       
+                   produtos[j].nome, quantidade, produtos[j].preco, precoTotal);
+                   total+=precoTotal;
+                   break;
             }
-            total+=total;
         }
-        
-        
     }
     printf("Valor total do carrinho: %.2lf\n\n",total);
-    
 }
 
 
@@ -134,7 +133,7 @@ int main(){
 	int contador_produto =0;
 	int opcao, retorno_menu, produtoId,quantidade;
 	int contador_carrinho=0;
-	float total=0;
+	
 	
 	ItemCarrinho carrinho[10];
     int numItens = 0;
@@ -180,7 +179,7 @@ int main(){
 			system("cls");
 		} while (opcao!=2);
 		      
-		  exibirCarrinho(carrinho, numItens, produtos, numProdutos, total);
+		  exibirCarrinho(carrinho, numItens, produtos, numProdutos);
            
 		}
 		}while(retorno_menu!=4);
