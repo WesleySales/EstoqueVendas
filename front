@@ -1,0 +1,117 @@
+#include <stdio.h>
+#include <string.h>
+#include <curses.h>
+
+#define USERNAME "client"
+#define PASSWORD "senha123"
+#define ADMIN_USERNAME "admin"
+#define ADMIN_PASSWORD "admin123"
+
+void sucessoCadastro() {
+    printw("Cadastro realizado com sucesso! \n");
+    printw("Pressione qualquer tecla para continuar...\n");
+    getch(); // Aguarda o usuário pressionar uma tecla
+}
+
+void adicionarProduto() {
+    char produto[256];
+
+    printw("Digite o nome do produto para adicionar: \n");
+    getstr(produto);
+    // Aqui você pode adicionar o código para salvar o novo produto
+
+    printw("Produto '%s' adicionado com sucesso!\n", produto);
+    printw("Pressione qualquer tecla para continuar...\n");
+    getch(); // Aguarda o usuário pressionar uma tecla
+}
+
+void escolhaCliente();
+
+void cadastro() {
+    char username[256];
+    char senha[256];
+
+    printw("Crie um nome de usuário: \n");
+    getstr(username);
+    printw("Crie uma senha: \n");
+    getstr(senha);
+
+    // Aqui você pode adicionar o código para salvar os novos dados de usuário
+    sucessoCadastro();
+    escolhaCliente(); // Retorna para a tela de escolha do cliente
+}
+
+void loginCliente() {
+    char username[256];
+    char senha[256];
+
+    printw("Digite o nome de usuário: \n");
+    getstr(username);
+    printw("Digite a senha: \n");
+    getstr(senha);
+
+    if (strcmp(username, USERNAME) == 0 && strcmp(senha, PASSWORD) == 0) {
+        printw("Login de cliente realizado com sucesso!\n");
+    } else {
+        printw("Nome de usuário ou senha incorretos!\n");
+    }
+    printw("Pressione qualquer tecla para continuar...\n");
+    getch(); // Aguarda o usuário pressionar uma tecla
+    escolhaCliente(); // Retorna para a tela de escolha do cliente
+}
+
+void loginAdmin() {
+    char username[256];
+    char senha[256];
+
+    printw("Digite o nome de usuário do administrador: \n");
+    getstr(username);
+    printw("Digite a senha do administrador: \n");
+    getstr(senha);
+
+    if (strcmp(username, ADMIN_USERNAME) == 0 && strcmp(senha, ADMIN_PASSWORD) == 0) {
+        printw("Login de administrador realizado com sucesso!\n");
+        adicionarProduto();
+    } else {
+        printw("Nome de usuário ou senha de administrador incorretos!\n");
+    }
+    escolhaCliente(); // Retorna para a tela de escolha do cliente
+}
+
+void escolhaCliente() {
+    int opcao;
+    printw("Digite 1 para login ou 2 para cadastro: \n");
+    scanw("%d", &opcao);
+
+    if (opcao == 1) {
+        loginCliente();
+    } else if (opcao == 2) {
+        cadastro();
+    } else {
+        printw("Opção inválida!\n");
+        getch(); // Aguarda o usuário pressionar uma tecla
+        escolhaCliente(); // Retorna para a tela de escolha do cliente
+    }
+}
+
+int main() {
+    initscr(); // Inicializa a tela para uso com a biblioteca curses
+    cbreak(); // Desativa o buffer de linha, permitindo que os caracteres sejam lidos imediatamente
+    noecho(); // Desativa a exibição automática de caracteres de entrada
+
+    int tipoUsuario;
+
+    printw("Digite 1 para Administrador ou 2 para Cliente: \n");
+    scanw("%d", &tipoUsuario);
+
+    if (tipoUsuario == 1) {
+        loginAdmin();
+    } else if (tipoUsuario == 2) {
+        escolhaCliente();
+    } else {
+        printw("Tipo de usuário inválido!\n");
+    }
+
+    endwin(); // Finaliza a tela curses
+    return 0;
+}
