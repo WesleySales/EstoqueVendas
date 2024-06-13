@@ -1,0 +1,196 @@
+#include <stdio.h>
+#include <locale.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define TAM 2
+#define MAX 50
+
+int main(){
+	setlocale(LC_ALL, "Portuguese");
+	
+	
+	//Produtos
+	int qnt_prod[TAM], sku_prod[TAM];
+	float valor_prod[TAM];
+	char nome_prod[TAM][MAX];
+	
+	
+	//Contadores
+	int i;
+	int tam_produto_cadastrado=1;
+	int ind;
+	//Opções
+	int opcao_painel_cadastro, opcao_dentro_cadastro, opcao_editor_produto_fora, opcao_editor_produto_dentro;
+	int opcao_painel_editor_nome;
+	
+	//Procuras
+	int sku_procura;
+	char nome_prod_procura_principal[MAX];
+	
+	//Editor
+	char nome_prod_novo[MAX];
+	int qnt_prod_novo;
+	float valor_prod_novo;
+	
+	do{	
+		printf("\nPainel ADM\n");
+		printf("\n1- Cadastro de Produtos\n2- Visualizar Produtos\n3- Editar Produtos\n4- Excluir Produto\n0- Sair\n");
+		scanf("%d", &opcao_painel_cadastro);
+		
+		switch(opcao_painel_cadastro){
+			case 1:
+				printf("\nCadastro de Produtos");
+				
+				for(i=0;i<TAM;i++){
+					sku_prod[i] = i +
+					printf("\n(%d) Nome = ", i+1);
+					scanf("%s", nome_prod[i]);
+					fflush(stdin);
+					
+					printf("(%d) Quantidade = ", i+1);
+					scanf("%d", &qnt_prod[i]);
+					fflush(stdin);
+					
+					printf("(%d) Valor = R$ ", i+1);
+					scanf("%f", &valor_prod[i]);
+					fflush(stdin);
+					
+					
+					printf("\nDeseja Continuar?\n1- Sim\n2- Não\n");
+					scanf("%d", &opcao_dentro_cadastro);
+					fflush(stdin);
+					
+					
+					if(opcao_dentro_cadastro==2){
+						i = i+200;
+					}else{
+						tam_produto_cadastrado = tam_produto_cadastrado + 1;
+					}
+			}			
+			system("cls");
+			break;
+			
+			case 2:
+				printf("\nListagem de Produtos\n");
+
+				for(i=0;i<tam_produto_cadastrado;i++){
+					printf("\nProduto = %s\n",  nome_prod[i]);
+					printf("SKU = %d\n", sku_prod[i]);
+					printf("Quantidade = %d\n",  qnt_prod[i]);
+					printf("Valor = R$ %f\n",  valor_prod[i]);
+				}
+				
+			break;
+				
+			case 3:
+				printf("\nEditor Produto\n");
+				
+				printf("\n1- Edição por SKU\n2- Edição por nome\n");
+				scanf("%d", &opcao_editor_produto_fora);
+				fflush(stdin);
+				
+				if(opcao_editor_produto_fora==1){
+					
+					printf("Digite SKU = ");
+					scanf("%d", &sku_procura);
+					system("cls");
+						
+					for(i=0;i<tam_produto_cadastrado;i++){
+						if(sku_prod[i]==sku_procura){
+								ind = i;
+								printf("\nProduto = %s\n", nome_prod[ind]);
+								printf("SKU = %d\n", sku_prod[ind]);
+								printf("Quantidade = %d\n", qnt_prod[ind]);
+								printf("Valor = %f", valor_prod[ind]);
+						}		
+					}	
+						
+					printf("\n\nOpção de Alteração\n");
+					printf("1- Nome\n2- Quantidade\n3- Valor\n4- Sair\n");
+					scanf("%d", &opcao_editor_produto_dentro);
+					fflush(stdin);
+						
+					switch(opcao_editor_produto_dentro){
+						
+						case 1: 
+							printf("\nDigite o novo nome = ");
+							scanf("%s", nome_prod_novo);
+							fflush(stdin);
+					
+							for(i=0;i<tam_produto_cadastrado;i++){
+								if(sku_prod[i]==sku_procura){
+									strcpy(nome_prod[i], nome_prod_novo);
+									printf("Nome alterado para = %s\n", nome_prod[i]);
+								}
+							}				
+						break;
+					
+						case 2:
+							printf("\nDigite nova quantidade = ");
+							scanf("%d", &qnt_prod_novo);
+							fflush(stdin);
+							
+							for(i=0;i<tam_produto_cadastrado;i++){
+								if(sku_prod[i]==sku_procura){
+									qnt_prod[i] = qnt_prod_novo;
+									printf("Quantidade alterada para = %d\n", qnt_prod[i]);
+								}
+							}
+						break;
+						
+						case 3: 
+							printf("\nDigite novo valor = R$ ");
+							scanf("%f", &valor_prod_novo);
+							fflush(stdin);
+							
+							for(i=0;i<tam_produto_cadastrado;i++){
+								if(sku_prod[i]==sku_procura){
+									valor_prod[i] = valor_prod_novo;
+									printf("Quantidade alterada para = %f\n", valor_prod[i]);
+								}
+							}
+						break;
+						
+						case 4:
+							printf("Saindo . . .");
+						break;
+						
+					}
+					
+					
+				}else if(opcao_editor_produto_fora==2){
+					printf("\nDigite nome do produto = ");
+					scanf("%s", nome_prod_procura_principal);
+					fflush(stdin);
+					
+					do{
+						for(i=0;i<tam_produto_cadastrado;i++){
+							if(strcmp(nome_prod_procura_principal, nome_prod[i])==0){
+								
+								
+
+								
+								
+								
+							}else{
+								printf("Produto não localizaddo, tentar novamente?");
+								printf("\n1- Sim\n2- Não\n");
+								scanf("%d", opcao_painel_editor_nome);
+							}
+						}
+					}while(opcao_painel_editor_nome==1);
+					
+					
+				}else{
+					printf("Opção Invalida");
+				}
+			break;				
+		
+			case 4:
+				
+			break;
+		}
+		
+	}while(opcao_painel_cadastro != 0);
+}
