@@ -1,15 +1,11 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include <locale.h>
 #include <string.h>
+#include <stdlib.h>
 
-void menuAdmin();
-void menuUsuario();
-void cadastroUsuario();
-void cadastroProdutos();
-void visualizarProdutos();
-void visualizarVendas();
-void exibirCarrinho();
-void voltarMenuAnterior();
+#define TAM 2
+#define MAX 50
+#define MAX_ITENS 10
 
 // Estrutura para representar um item do carrinho
 typedef struct {
@@ -18,14 +14,31 @@ typedef struct {
     int quantidade;
 } ItemCarrinho;
 
-// Suponha que temos um carrinho com um número fixo de itens por simplicidade
-#define MAX_ITENS 10
+// Variáveis globais para o carrinho
 ItemCarrinho carrinho[MAX_ITENS];
 int totalItens = 0; // Total de itens no carrinho
 
+// Variáveis globais para os produtos
+int qnt_prod[TAM], sku_prod[TAM];
+float valor_prod[TAM];
+char nome_prod[TAM][MAX];
+int tam_produto_cadastrado = 0;
+
+// Protótipos das funções
+void menuAdmin();
+void menuUsuario();
+void cadastroUsuario();
+void cadastroProdutos();
+void visualizarProdutos();
+void visualizarVendas();
+void exibirCarrinho();
+void voltarMenuAnterior();
+void adicionarAoCarrinho(char *nome, float preco, int quantidade);
+
 int main() {
+    setlocale(LC_ALL, "Portuguese");
     int opcao;
-    
+
     printf("--------------------------------------------------\n");
     printf("                     Nome da loja                 \n");
     printf("--------------------------------------------------\n");
@@ -33,7 +46,7 @@ int main() {
     printf("2. Acessar como usuário\n");
     printf("Escolha uma opção: ");
     scanf("%d", &opcao);
-    
+
     switch(opcao) {
         case 1:
             menuAdmin();
@@ -44,7 +57,7 @@ int main() {
         default:
             printf("Opção inválida!\n");
     }
-    
+
     return 0;
 }
 
@@ -60,7 +73,7 @@ void menuAdmin() {
     printf("5. Voltar\n");
     printf("Escolha uma opção: ");
     scanf("%d", &opcao);
-    
+
     switch(opcao) {
         case 1:
             cadastroUsuario();
@@ -96,7 +109,7 @@ void menuUsuario() {
     printf("3. Voltar\n");
     printf("Escolha uma opção: ");
     scanf("%d", &opcao);
-    
+
     switch(opcao) {
         case 1:
             visualizarProdutos();
@@ -169,5 +182,6 @@ void exibirCarrinho() {
     printf("Total: %.2f\n", total);
 }
 
-
+// Implementação das funções de gerenciamento de produtos
+// ...
 
