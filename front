@@ -1,107 +1,110 @@
 #include <stdio.h>
-#include <string.h>
-#include <curses.h>
+#include <stdlib.h>
 
-#define USERNAME "client"
-#define PASSWORD "senha123"
-#define ADMIN_USERNAME "admin"
-#define ADMIN_PASSWORD "admin123"
-
-void sucessoCadastro(WINDOW *win) {
-    wprintw(win, "Cadastro realizado com sucesso! \n");
-    wrefresh(win);
-}
-
-void adicionarProduto(WINDOW *win) {
-    char produto[256];
-
-    wprintw(win, "Digite o nome do produto para adicionar: \n");
-    wrefresh(win);
-    wgetstr(win, produto);
-    // Aqui você pode adicionar o código para salvar o novo produto
-
-    wprintw(win, "Produto '%s' adicionado com sucesso!\n", produto);
-    wrefresh(win);
-}
-
-void cadastro(WINDOW *win) {
-    char username[256];
-    char senha[256];
-
-    wprintw(win, "Crie um nome de usuário: \n");
-    wrefresh(win);
-    wgetstr(win, username);
-    wprintw(win, "Crie uma senha: \n");
-    wrefresh(win);
-    wgetstr(win, senha);
-
-    // Aqui você pode adicionar o código para salvar os novos dados de usuário
-    sucessoCadastro(win);
-}
-
-void loginCliente(WINDOW *win) {
-    char username[256];
-    char senha[256];
-
-    wprintw(win, "Digite o nome de usuário: \n");
-    wrefresh(win);
-    wgetstr(win, username);
-    wprintw(win, "Digite a senha: \n");
-    wrefresh(win);
-    wgetstr(win, senha);
-
-    if (strcmp(username, USERNAME) == 0 && strcmp(senha, PASSWORD) == 0) {
-        wprintw(win, "Login de cliente realizado com sucesso!\n");
-    } else {
-        wprintw(win, "Nome de usuário ou senha incorretos!\n");
-    }
-    wrefresh(win);
-}
-
-void loginAdmin(WINDOW *win) {
-    char username[256];
-    char senha[256];
-
-    wprintw(win, "Digite o nome de usuário do administrador: \n");
-    wrefresh(win);
-    wgetstr(win, username);
-    wprintw(win, "Digite a senha do administrador: \n");
-    wrefresh(win);
-    wgetstr(win, senha);
-
-    if (strcmp(username, ADMIN_USERNAME) == 0 && strcmp(senha, ADMIN_PASSWORD) == 0) {
-        wprintw(win, "Login de administrador realizado com sucesso!\n");
-        wrefresh(win);
-        adicionarProduto(win);
-    } else {
-        wprintw(win, "Nome de usuário ou senha de administrador incorretos!\n");
-        wrefresh(win);
-    }
-}
+void menuAdmin();
+void menuUsuario();
+void cadastroUsuario();
+void cadastroProdutos();
+void visualizarProdutos();
+void visualizarVendas();
+void exibirCarrinho();
 
 int main() {
-    WINDOW *win;
-    int tipoUsuario;
-
-    initscr(); // Inicializa a tela para uso com a biblioteca curses
-    cbreak(); // Desativa o buffer de linha, permitindo que os caracteres sejam lidos imediatamente
-    noecho(); // Desativa a exibição automática de caracteres de entrada
-    win = newwin(0, 0, 0, 0); // Cria uma nova janela
-
-    wprintw(win, "Digite 1 para Administrador ou 2 para Cliente: \n");
-    wrefresh(win);
-    wscanw(win, "%d", &tipoUsuario);
-
-    if (tipoUsuario == 1) {
-        loginAdmin(win);
-    } else if (tipoUsuario == 2) {
-        cadastro(win);
-    } else {
-        wprintw(win, "Tipo de usuário inválido!\n");
-        wrefresh(win);
+    int opcao;
+    
+    printf("--------------------------------------------------\n");
+    printf("                     Nome da loja                 \n");
+    printf("--------------------------------------------------\n");
+    printf("1. Acessar como administrador\n");
+    printf("2. Acessar como usuário\n");
+    printf("Escolha uma opção: ");
+    scanf("%d", &opcao);
+    
+    switch(opcao) {
+        case 1:
+            menuAdmin();
+            break;
+        case 2:
+            menuUsuario();
+            break;
+        default:
+            printf("Opção inválida!\n");
     }
-
-    delwin(win); // Deleta a janela criada
-    endwin(); // Finaliza a tela curses
+    
     return 0;
+}
+
+void menuAdmin() {
+    int opcao;
+    printf("--------------------------------------------------\n");
+    printf("                     Menu admin                   \n");
+    printf("--------------------------------------------------\n");
+    printf("1. Cadastro de usuário\n");
+    printf("2. Cadastro de produtos (editar produtos)\n");
+    printf("3. Visualizar produtos\n");
+    printf("4. Visualizar vendas\n");
+    printf("Escolha uma opção: ");
+    scanf("%d", &opcao);
+    
+    // Implemente as funções de acordo com a necessidade
+    switch(opcao) {
+        case 1:
+            cadastroUsuario();
+            break;
+        case 2:
+            cadastroProdutos();
+            break;
+        case 3:
+            visualizarProdutos();
+            break;
+        case 4:
+            visualizarVendas();
+            break;
+        default:
+            printf("Opção inválida!\n");
+    }
+}
+
+void menuUsuario() {
+    int opcao;
+    printf("--------------------------------------------------\n");
+    printf("                     Menu usuário                 \n");
+    printf("--------------------------------------------------\n");
+    printf("1. Apresentar todos os produtos cadastrados\n");
+    printf("2. Exibir carrinho\n");
+    printf("Escolha uma opção: ");
+    scanf("%d", &opcao);
+    
+    // Implemente as funções de acordo com a necessidade
+    switch(opcao) {
+        case 1:
+            visualizarProdutos();
+            break;
+        case 2:
+            exibirCarrinho();
+            break;
+        default:
+            printf("Opção inválida!\n");
+    }
+}
+
+// Implemente as seguintes funções de acordo com as regras de negócio da loja
+void cadastroUsuario() {
+    // Código para cadastro de usuário
+}
+
+void cadastroProdutos() {
+    // Código para cadastro e edição de produtos
+}
+
+void visualizarProdutos() {
+    // Código para visualizar produtos
+}
+
+void visualizarVendas() {
+    // Código para visualizar vendas
+}
+
+void exibirCarrinho() {
+    // Código para exibir o carrinho e finalizar a compra
 }
