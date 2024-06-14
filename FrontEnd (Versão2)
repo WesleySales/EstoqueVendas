@@ -1,0 +1,195 @@
+#include <ncurses.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+
+// Funções para exibição de telas
+void exibir_tela_login();
+void exibir_menu_admin();
+void exibir_menu_usuario();
+void exibir_carrinho();
+
+int main() {
+    initscr();          // Inicializa a tela
+    cbreak();           // Desabilita o buffer de linha
+    noecho();           // Não mostra os caracteres digitados no terminal
+
+    exibir_tela_login(); // Exibe a tela de login inicial
+
+    endwin();           // Restaura o terminal padrão
+    return 0;           // Encerra o programa
+}
+
+void exibir_tela_login() {
+    int escolha;        // Armazena a escolha do usuário
+    const char *opcoes[] = {
+        "1. Acessar como administrador",
+        "2. Acessar como usuário",
+        "3. Sair"
+    };
+    int n_opcoes = sizeof(opcoes) / sizeof(opcoes[0]); // Número de opções
+
+    while (1) {
+        clear();        // Limpa a tela
+        box(stdscr, 0, 0); // Desenha a borda ao redor da tela
+        mvprintw(1, (COLS - strlen("Nome da loja")) / 2, "Nome da loja"); // Centraliza e imprime o nome da loja
+
+        for (int i = 0; i < n_opcoes; ++i) {
+            mvprintw(3 + 2*i, (COLS - strlen(opcoes[i])) / 2, "%s", opcoes[i]); // Imprime a opção
+        }
+
+        refresh();      // Atualiza a tela
+        mvprintw(LINES - 1, 0, "Escolha uma opção: "); // Solicita a escolha do usuário
+        echo();         // Habilita a exibição da entrada do usuário
+        scanw("%d", &escolha); // Captura a escolha do usuário
+        noecho();       // Desabilita a exibição da entrada do usuário
+
+        switch(escolha) {
+            case 1:
+                exibir_menu_admin(); // Exibe o menu admin
+                break;
+            case 2:
+                exibir_menu_usuario(); // Exibe o menu usuário
+                break;
+            case 3:
+                return; // Sai do programa
+            default:
+                mvprintw(LINES - 2, 0, "Opção inválida, tente novamente."); // Mensagem de erro
+                break;
+        }
+    }
+}
+
+void exibir_menu_admin() {
+    int escolha;        // Armazena a escolha do usuário
+    const char *opcoes[] = {
+        "1. Cadastro de usuário",
+        "2. Cadastro de produtos (editar produtos)",
+        "3. Visualizar produtos",
+        "4. Visualizar vendas",
+        "5. Voltar"
+    };
+    int n_opcoes = sizeof(opcoes) / sizeof(opcoes[0]); // Número de opções
+
+    while (1) {
+        clear();        // Limpa a tela
+        box(stdscr, 0, 0); // Desenha a borda ao redor da tela
+        mvprintw(1, (COLS - strlen("Menu admin")) / 2, "Menu admin"); // Centraliza e imprime o título
+
+        for (int i = 0; i < n_opcoes; ++i) {
+            mvprintw(3 + 2*i, 5, "%s", opcoes[i]); // Imprime a opção
+        }
+
+        refresh();      // Atualiza a tela
+        mvprintw(LINES - 1, 0, "Escolha uma opção: "); // Solicita a escolha do usuário
+        echo();         // Habilita a exibição da entrada do usuário
+        scanw("%d", &escolha); // Captura a escolha do usuário
+        noecho();       // Desabilita a exibição da entrada do usuário
+
+        switch(escolha) {
+            case 1:
+                // Adicionar código para cadastro de usuário
+                break;
+            case 2:
+                // Adicionar código para cadastro de produtos
+                break;
+            case 3:
+                // Adicionar código para visualizar produtos
+                break;
+            case 4:
+                // Adicionar código para visualizar vendas
+                break;
+            case 5:
+                return; // Volta para a tela de login
+            default:
+                mvprintw(LINES - 2, 0, "Opção inválida, tente novamente."); // Mensagem de erro
+                break;
+        }
+    }
+}
+
+void exibir_menu_usuario() {
+    int escolha;        // Armazena a escolha do usuário
+    const char *opcoes[] = {
+        "1. Apresentar todos os produtos cadastrados",
+        "2. Adicionar produtos ao carrinho",
+        "3. Exibir carrinho",
+        "4. Voltar"
+    };
+    int n_opcoes = sizeof(opcoes) / sizeof(opcoes[0]); // Número de opções
+
+    while (1) {
+        clear();        // Limpa a tela
+        box(stdscr, 0, 0); // Desenha a borda ao redor da tela
+        mvprintw(1, (COLS - strlen("Menu usuário")) / 2, "Menu usuário"); // Centraliza e imprime o título
+
+        for (int i = 0; i < n_opcoes; ++i) {
+            mvprintw(3 + 2*i, 5, "%s", opcoes[i]); // Imprime a opção
+        }
+
+        refresh();      // Atualiza a tela
+        mvprintw(LINES - 1, 0, "Escolha uma opção: "); // Solicita a escolha do usuário
+        echo();         // Habilita a exibição da entrada do usuário
+        scanw("%d", &escolha); // Captura a escolha do usuário
+        noecho();       // Desabilita a exibição da entrada do usuário
+
+        switch(escolha) {
+            case 1:
+                // Adicionar código para apresentar produtos
+                break;
+            case 2:
+                // Adicionar código para adicionar produtos ao carrinho
+                break;
+            case 3:
+                exibir_carrinho(); // Exibe o carrinho
+                break;
+            case 4:
+                return; // Volta para a tela de login
+            default:
+                mvprintw(LINES - 2, 0, "Opção inválida, tente novamente."); // Mensagem de erro
+                break;
+        }
+    }
+}
+
+void exibir_carrinho() {
+    int escolha;        // Armazena a escolha do usuário
+    const char *opcoes[] = {
+        "1. Finalizar a compra",
+        "2. Voltar para adicionar outros produtos",
+        "3. Voltar"
+    };
+    int n_opcoes = sizeof(opcoes) / sizeof(opcoes[0]); // Número de opções
+
+    while (1) {
+        clear();        // Limpa a tela
+        box(stdscr, 0, 0); // Desenha a borda ao redor da tela
+        mvprintw(1, (COLS - strlen("Carrinho")) / 2, "Carrinho"); // Centraliza e imprime o título
+
+        for (int i = 0; i < n_opcoes; ++i) {
+            mvprintw(3 + 2*i, 5, "%s", opcoes[i]); // Imprime a opção
+        }
+
+        refresh();      // Atualiza a tela
+        mvprintw(LINES - 1, 0, "Escolha uma opção: "); // Solicita a escolha do usuário
+        echo();         // Habilita a exibição da entrada do usuário
+        scanw("%d", &escolha); // Captura a escolha do usuário
+        noecho();       // Desabilita a exibição da entrada do usuário
+
+        switch(escolha) {
+            case 1:
+                // Adicionar código para finalizar a compra
+                break;
+            case 2:
+                return; // Volta para o menu usuário
+            case 3:
+                return; // Volta para o menu usuário
+            default:
+                mvprintw(LINES - 2, 0, "Opção inválida, tente novamente."); // Mensagem de erro
+                break;
+        }
+    }
+}
+
+
