@@ -39,7 +39,7 @@ void menuAdm(){
 	printf("\nESCOLHA UMA DAS OPCOES: ");
 }
 
-//exibir produtos para os clientes, apenas nome e preÁo
+//exibir produtos para os clientes, apenas nome e pre√ßo
 void listarProdutos(produto produtos[], int contador_produto){
 	printf("*LOJA PURO VOODOO*\n");
 	
@@ -70,10 +70,10 @@ void adicionarAoCarrinho(ItemCarrinho carrinho[], int *numItens, int produtoId, 
     }
 
     if (itemExistente != -1) {
-        // Se o item j· estiver no carrinho, apenas atualiza a quantidade
+        // Se o item j√° estiver no carrinho, apenas atualiza a quantidade
         carrinho[itemExistente].quantidade += quantidade;
     } else {
-        // Se o item n„o estiver no carrinho, adiciona um novo item
+        // Se o item n√£o estiver no carrinho, adiciona um novo item
         carrinho[*numItens].produtoId = produtoId;
         carrinho[*numItens].quantidade = quantidade;
         (*numItens)++;
@@ -120,7 +120,7 @@ void exibirCarrinho(ItemCarrinho carrinho[], int numItens, produto produtos[], i
         for (int j = 0; j < numProdutos; j++) {
             if (produtos[j].id == produtoId) {
             	float precoTotal = produtos[j].preco * quantidade;
-                printf("ID %d  -  Produto: %s - Qtd: %d  -  PreÁo Und: %.2f  -  PreÁo Total: %.2f\n",
+                printf("ID %d  -  Produto: %s - Qtd: %d  -  Pre√ßo Und: %.2f  -  Pre√ßo Total: %.2f\n",
                    produtos[j].id,produtos[j].nome, quantidade, produtos[j].preco, precoTotal);
                    total+=precoTotal;
                    break;
@@ -153,7 +153,7 @@ void visualizarVendas(venda vendas[],int contador_venda){
 			
 }
 
-//funÁao para o administrador cadastrar produtos;
+//fun√ßao para o administrador cadastrar produtos;
 void cadastrarProduto(produto produtos[],int contador_produto,int estoque){
 	printf("\nCADASTRO DE PRODUTOS: \n");
 	printf("Produto: ");
@@ -162,17 +162,17 @@ void cadastrarProduto(produto produtos[],int contador_produto,int estoque){
 	scanf("%f",&produtos[contador_produto].preco);
 	printf("Estoque: ");
 	scanf("%d",&estoque);
-	produtos[contador_produto].estoque = atualizarEstoque(estoque);//transformei estoque em funÁ„o.
+	produtos[contador_produto].estoque = atualizarEstoque(estoque);//transformei estoque em fun√ß√£o.
 	
 	produtos[contador_produto].SKU = 20161 + contador_produto;
 }
 
-//exibir produtos e todos seus atributos para o administrador (SKU, NOME, PRE«O, ESTOQUE)
+//exibir produtos e todos seus atributos para o administrador (SKU, NOME, PRE√áO, ESTOQUE)
 void visualizarProdutos(produto produtos[], int contador_produto){
 	for(int i=0;i<contador_produto;i++){
 		printf("SKU: %d\n", produtos[i].SKU);
 		printf("Produto: %s\n",produtos[i].nome);
-		printf("PreÁo: R$ %.2lf\n",produtos[i].preco);
+		printf("Pre√ßo: R$ %.2lf\n",produtos[i].preco);
 		printf("Estoque: %d\n\n",produtos[i].estoque);
 	}
 }
