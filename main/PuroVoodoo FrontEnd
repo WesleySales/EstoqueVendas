@@ -1,0 +1,252 @@
+#include <stdio.h>
+#include <string.h>
+#include <ncurses.h> // Biblioteca para interface de usuário usando ncurses
+
+// Estrutura para dados do cliente
+typedef struct {
+    char nome[50];
+} Cliente;
+
+Cliente clientes[100]; // Array para armazenar os clientes cadastrados
+int num_clientes = 0;  // Contador de clientes cadastrados
+
+// Protótipos das funções
+void exibir_tela_login();
+void exibir_menu_admin();
+void exibir_menu_usuario();
+void exibir_carrinho();
+void cadastrar_cliente();
+
+int main() {
+    // Inicializa a tela do ncurses
+    initscr();
+    cbreak(); // Permite receber caracteres sem a necessidade de pressionar Enter
+    noecho(); // Não mostra os caracteres digitados pelo usuário
+    keypad(stdscr, TRUE); // Habilita a captura de teclas especiais
+
+    exibir_tela_login(); // Chama a função para exibir a tela de login
+
+    endwin(); // Restaura o terminal padrão ao sair do programa
+    return 0;
+}
+
+// Função para exibir a tela de login inicial
+void exibir_tela_login() {
+    int escolha;        // Armazena a escolha do usuário
+    const char *opcoes[] = {
+        "1. Cadastrar cliente",
+        "2. Acessar como administrador",
+        "3. Acessar como usuário",
+        "4. Sair"
+    };
+    int n_opcoes = sizeof(opcoes) / sizeof(opcoes[0]); // Número de opções
+
+    while (1) { // Loop infinito para manter a tela de login ativa até o usuário escolher sair
+        clear();        // Limpa a tela
+        box(stdscr, 0, 0); // Desenha a borda ao redor da tela
+        mvprintw(1, (COLS - strlen("Puro Voodoo")) / 2, "Puro Voodoo"); // Centraliza e imprime o nome da loja
+
+        // Imprime as opções do menu na tela
+        for (int i = 0; i < n_opcoes; ++i) {
+            mvprintw(3 + 2*i, (COLS - strlen(opcoes[i])) / 2, "%s", opcoes[i]);
+        }
+
+        refresh();      // Atualiza a tela para exibir as mudanças
+        mvprintw(LINES - 1, 0, "Escolha uma opção: "); // Solicita a escolha do usuário
+        echo();         // Habilita a exibição da entrada do usuário
+        scanw("%d", &escolha); // Captura a escolha do usuário
+        noecho();       // Desabilita a exibição da entrada do usuário
+
+        switch(escolha) {
+            case 1:
+                cadastrar_cliente(); // Chama a função para cadastrar cliente
+                break;
+            case 2:
+                exibir_menu_admin(); // Chama a função para exibir o menu de administração
+                break;
+            case 3:
+                exibir_menu_usuario(); // Chama a função para exibir o menu de usuário
+                break;
+            case 4:
+                return; // Sai do programa
+            default:
+                mvprintw(LINES - 2, 0, "Opção inválida, tente novamente."); // Mensagem de erro para opção inválida
+                break;
+        }
+    }
+}
+
+// Função para exibir o menu de administração
+void exibir_menu_admin() {
+    int escolha;        // Armazena a escolha do usuário
+    const char *opcoes[] = {
+        "1. Cadastro de usuário",
+        "2. Cadastro de produtos (editar produtos)",
+        "3. Visualizar produtos",
+        "4. Visualizar vendas",
+        "5. Voltar"
+    };
+    int n_opcoes = sizeof(opcoes) / sizeof(opcoes[0]); // Número de opções
+
+    while (1) { // Loop infinito para manter o menu de administração ativo até o usuário escolher voltar
+        clear();        // Limpa a tela
+        box(stdscr, 0, 0); // Desenha a borda ao redor da tela
+        mvprintw(1, (COLS - strlen("Menu admin")) / 2, "Menu admin"); // Centraliza e imprime o título
+
+        // Imprime as opções do menu na tela
+        for (int i = 0; i < n_opcoes; ++i) {
+            mvprintw(3 + 2*i, 5, "%s", opcoes[i]);
+        }
+
+        refresh();      // Atualiza a tela para exibir as mudanças
+        mvprintw(LINES - 1, 0, "Escolha uma opção: "); // Solicita a escolha do usuário
+        echo();         // Habilita a exibição da entrada do usuário
+        scanw("%d", &escolha); // Captura a escolha do usuário
+        noecho();       // Desabilita a exibição da entrada do usuário
+
+        switch(escolha) {
+            case 1:
+                // Implementar função para cadastro de usuário
+                break;
+            case 2:
+                // Implementar função para cadastro de produtos
+                break;
+            case 3:
+                // Implementar função para visualizar produtos
+                break;
+            case 4:
+                // Implementar função para visualizar vendas
+                break;
+            case 5:
+                return; // Volta para a tela de login
+            default:
+                mvprintw(LINES - 2, 0, "Opção inválida, tente novamente."); // Mensagem de erro para opção inválida
+                break;
+        }
+    }
+}
+
+// Função para exibir o menu de usuário
+void exibir_menu_usuario() {
+    int escolha;        // Armazena a escolha do usuário
+    const char *opcoes[] = {
+        "1. Apresentar todos os produtos cadastrados",
+        "2. Adicionar produtos ao carrinho",
+        "3. Exibir carrinho",
+        "4. Voltar"
+    };
+    int n_opcoes = sizeof(opcoes) / sizeof(opcoes[0]); // Número de opções
+
+    while (1) { // Loop infinito para manter o menu de usuário ativo até o usuário escolher voltar
+        clear();        // Limpa a tela
+        box(stdscr, 0, 0); // Desenha a borda ao redor da tela
+        mvprintw(1, (COLS - strlen("Menu usuário")) / 2, "Menu usuário"); // Centraliza e imprime o título
+
+        // Imprime as opções do menu na tela
+        for (int i = 0; i < n_opcoes; ++i) {
+            mvprintw(3 + 2*i, 5, "%s", opcoes[i]);
+        }
+
+        refresh();      // Atualiza a tela para exibir as mudanças
+        mvprintw(LINES - 1, 0, "Escolha uma opção: "); // Solicita a escolha do usuário
+        echo();         // Habilita a exibição da entrada do usuário
+        scanw("%d", &escolha); // Captura a escolha do usuário
+        noecho();       // Desabilita a exibição da entrada do usuário
+
+        switch(escolha) {
+            case 1:
+                // Implementar função para apresentar produtos
+                break;
+            case 2:
+                // Implementar função para adicionar produtos ao carrinho
+                break;
+            case 3:
+                exibir_carrinho(); // Chama a função para exibir o carrinho
+                break;
+            case 4:
+                return; // Volta para a tela de login
+            default:
+                mvprintw(LINES - 2, 0, "Opção inválida, tente novamente."); // Mensagem de erro para opção inválida
+                break;
+        }
+    }
+}
+
+// Função para exibir o carrinho de compras
+void exibir_carrinho() {
+    int escolha;        // Armazena a escolha do usuário
+    const char *opcoes[] = {
+        "1. Finalizar a compra",
+        "2. Voltar para adicionar outros produtos",
+        "3. Voltar"
+    };
+    int n_opcoes = sizeof(opcoes) / sizeof(opcoes[0]); // Número de opções
+
+    while (1) { // Loop infinito para manter o carrinho de compras ativo até o usuário escolher voltar
+        clear();        // Limpa a tela
+        box(stdscr, 0, 0); // Desenha a borda ao redor da tela
+        mvprintw(1, (COLS - strlen("Carrinho")) / 2, "Carrinho"); // Centraliza e imprime o título
+
+        // Imprime as opções do menu na tela
+        for (int i = 0; i < n_opcoes; ++i) {
+            mvprintw(3 + 2*i, 5, "%s", opcoes[i]);
+        }
+
+        refresh();      // Atualiza a tela para exibir as mudanças
+        mvprintw(LINES - 1, 0, "Escolha uma opção: "); // Solicita a escolha do usuário
+        echo();         // Habilita a exibição da entrada do usuário
+        scanw("%d", &escolha); // Captura a escolha do usuário
+        noecho();       // Desabilita a exibição da entrada do usuário
+
+        switch(escolha) {
+            case 1:
+                // Implementar função para finalizar a compra
+                break;
+            case 2:
+                return; // Volta para o menu usuário
+            case 3:
+                return; // Volta para o menu usuário
+            default:
+                mvprintw(LINES - 2, 0, "Opção inválida, tente novamente."); // Mensagem de erro para opção inválida
+                break;
+        }
+    }
+}
+
+// Função para cadastrar um novo cliente
+void cadastrar_cliente() {
+    clear();        // Limpa a tela
+    box(stdscr, 0, 0); // Desenha a borda ao redor da tela
+    mvprintw(1, (COLS - strlen("Cadastro de Cliente")) / 2, "Cadastro de Cliente"); // Centraliza e imprime o título
+
+    char nome_cliente[50];
+    mvprintw(3, 5, "Digite o nome do cliente: ");
+    echo();
+    getstr(nome_cliente); // Captura o nome do cliente
+    noecho();
+
+    // Armazena o cliente na lista de clientes
+    strcpy(clientes[num_clientes].nome, nome_cliente);
+    num_clientes++;
+
+    mvprintw(5, 5, "Cliente cadastrado com sucesso.");
+    mvprintw(7, 5, "Deseja cadastrar um novo cliente?");
+    mvprintw(9, 5, "1. Sim");
+    mvprintw(10, 5, "2. Não");
+
+    int escolha;
+    echo();
+    scanw("%d", &escolha);
+    noecho();
+
+    switch (escolha) {
+        case 1:
+            cadastrar_cliente(); // Cadastrar novo cliente
+            break;
+        case 2:
+            break; // Volta ao menu de login
+        default:
+            mvprintw(12, 5, "Opção inválida, voltando ao menu de login.");
+            break;
+    }
+}
