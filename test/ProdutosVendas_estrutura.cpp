@@ -20,7 +20,7 @@ void cadastrarProduto(produto produtos[TAM]){
 	for(int i=0;i<TAM;i++){
 		printf("Digite o nome do produto: ");
 		scanf("%s",produtos[i].nome);
-		printf("Digite o preço: ");
+		printf("Digite o preÃ§o: ");
 		scanf("%lf",produtos[i].preco);
 		printf("Digite a quantidade: ");
 		scanf("%d",produtos[i].estoque);
