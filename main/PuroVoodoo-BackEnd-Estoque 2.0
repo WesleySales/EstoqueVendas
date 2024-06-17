@@ -1,0 +1,287 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <locale.h>
+
+#define TAM 10000
+#define MAX 50
+
+// Definindo a estrutura Produto
+typedef struct {
+    int sku;
+    char nome[MAX];
+    int quantidade;
+    float valor;
+} Produto;
+
+int main() {
+    // Configurando o locale para português
+    setlocale(LC_ALL, "Portuguese");
+
+    // Declaração de variáveis
+    Produto produtos[TAM];
+    int tam_produto_cadastrado = 0;
+    int opcao_painel_adm;
+
+    // Menu principal
+    do {
+        printf("\nPainel ADM\n");
+        printf("\n1- Cadastro de Produtos\n2- Visualizar Produtos\n3- Editar Produtos\n4- Excluir Produto\n0- Sair\n");
+        scanf("%d", &opcao_painel_adm);
+        fflush(stdin); // Limpar o buffer do teclado
+		
+
+        switch (opcao_painel_adm) {
+            case 0:
+                printf("Saindo . . .\n");
+                break;
+
+            case 1:
+                printf("\nCadastro de Produtos\n");
+
+                // Cadastro de produtos
+                do {
+                    if (tam_produto_cadastrado == TAM) {
+                        printf("Limite de produtos atingido.\n");
+                        break;
+                    }
+
+                    printf("(%d) Nome = ", tam_produto_cadastrado + 1);
+                    scanf("%s", produtos[tam_produto_cadastrado].nome);
+                    fflush(stdin);
+
+                    printf("(%d) Quantidade = ", tam_produto_cadastrado + 1);
+                    scanf("%d", &produtos[tam_produto_cadastrado].quantidade);
+                    fflush(stdin);
+
+                    printf("(%d) Valor = R$ ", tam_produto_cadastrado + 1);
+                    scanf("%f", &produtos[tam_produto_cadastrado].valor);
+                    fflush(stdin);
+
+                    // Geração automática de SKU
+                    produtos[tam_produto_cadastrado].sku = tam_produto_cadastrado + 1;
+
+                    tam_produto_cadastrado++;
+
+                    printf("\nDeseja Continuar?\n1- Sim\n2- Não\n");
+                    scanf("%d", &opcao_painel_adm);
+                    fflush(stdin);
+                } while (opcao_painel_adm == 1);
+
+				for (int i = 0; i < tam_produto_cadastrado; i++) {
+    				if(produtos[i].quantidade<100){
+					printf("\nO produto %s está com baixa quantidade em estoque", produtos[i].nome);
+					printf("\nQuantidade = %d\n", produtos[i].quantidade);
+					}
+				}
+                break;
+
+            case 2:
+                printf("\nListagem de Produtos\n");
+
+                // Listagem de produtos cadastrados
+                for (int i = 0; i < tam_produto_cadastrado; i++) {
+                    printf("\nProduto = %s\n", produtos[i].nome);
+                    printf("SKU = %d\n", produtos[i].sku);
+                    printf("Quantidade = %d\n", produtos[i].quantidade);
+                    printf("Valor = R$ %.2f\n", produtos[i].valor);
+                }
+                
+				for (int i = 0; i < tam_produto_cadastrado; i++) {
+    				if(produtos[i].quantidade<100){
+					printf("\nO produto %s está com baixa quantidade em estoque", produtos[i].nome);
+					printf("\nQuantidade = %d\n", produtos[i].quantidade);
+					}
+				}
+				break;
+
+            case 3:
+                printf("\nEditor de Produtos\n");
+
+                // Opção de edição por SKU ou por nome
+                printf("\n1- Edição por SKU\n2- Edição por nome\n0- Sair\n");
+                scanf("%d", &opcao_painel_adm);
+                fflush(stdin);
+
+                if (opcao_painel_adm == 1) {
+                    int sku_procura;
+                    printf("Digite o SKU = ");
+                    scanf("%d", &sku_procura);
+                    fflush(stdin);
+
+                    // Procurar pelo SKU e editar
+                    for (int i = 0; i < tam_produto_cadastrado; i++) {
+                        if (produtos[i].sku == sku_procura) {
+                            printf("\nProduto encontrado:\n");
+                            printf("Nome = %s\n", produtos[i].nome);
+                            printf("SKU = %d\n", produtos[i].sku);
+                            printf("Quantidade = %d\n", produtos[i].quantidade);
+                            printf("Valor = R$ %.2f\n", produtos[i].valor);
+
+                            // Menu de edição
+                            printf("\nOpções de Edição\n");
+                            printf("1- Nome\n2- Quantidade\n3- Valor\n0- Sair\n");
+                            scanf("%d", &opcao_painel_adm);
+                            fflush(stdin);
+
+                            switch (opcao_painel_adm) {
+                                case 1:
+                                    printf("Novo nome = ");
+                                    scanf("%s", produtos[i].nome);
+                                    break;
+                                case 2:
+                                    printf("Nova quantidade = ");
+                                    scanf("%d", &produtos[i].quantidade);
+                                    break;
+                                case 3:
+                                    printf("Novo valor = ");
+                                    scanf("%f", &produtos[i].valor);
+                                    break;
+                                case 0:
+                                    printf("Saindo...\n");
+                                    break;
+                                default:
+                                    printf("Opção inválida.\n");
+                                    break;
+                            }
+                        }
+                    }
+                    for (int i = 0; i < tam_produto_cadastrado; i++) {
+    					if(produtos[i].quantidade<100){
+						printf("\nO produto %s está com baixa quantidade em estoque", produtos[i].nome);
+						printf("\nQuantidade = %d\n", produtos[i].quantidade);
+						}
+					}
+					
+                } else if (opcao_painel_adm == 2) {
+                    char nome_procura[MAX];
+                    printf("Digite o nome do produto = ");
+                    scanf("%s", nome_procura);
+                    fflush(stdin);
+
+                    // Procurar pelo nome e editar
+                    for (int i = 0; i < tam_produto_cadastrado; i++) {
+                        if (strcmp(produtos[i].nome, nome_procura) == 0) {
+                            printf("\nProduto encontrado:\n");
+                            printf("Nome = %s\n", produtos[i].nome);
+                            printf("SKU = %d\n", produtos[i].sku);
+                            printf("Quantidade = %d\n", produtos[i].quantidade);
+                            printf("Valor = R$ %.2f\n", produtos[i].valor);
+
+                            // Menu de edição
+                            printf("\nOpções de Edição\n");
+                            printf("1- Nome\n2- Quantidade\n3- Valor\n0- Sair\n");
+                            scanf("%d", &opcao_painel_adm);
+                            fflush(stdin);
+
+                            switch (opcao_painel_adm) {
+                                case 1:
+                                    printf("Novo nome = ");
+                                    scanf("%s", produtos[i].nome);
+                                    break;
+                                case 2:
+                                    printf("Nova quantidade = ");
+                                    scanf("%d", &produtos[i].quantidade);
+                                    break;
+                                case 3:
+                                    printf("Novo valor = ");
+                                    scanf("%f", &produtos[i].valor);
+                                    break;
+                                case 0:
+                                    printf("Saindo...\n");
+                                    break;
+                                default:
+                                    printf("Opção inválida.\n");
+                                    break;
+                            }
+                        }
+                    }
+                    for (int i = 0; i < tam_produto_cadastrado; i++) {
+    				        	if(produtos[i].quantidade<100){
+				            		printf("\nO produto %s está com baixa quantidade em estoque", produtos[i].nome);
+			            			printf("\nQuantidade = %d\n", produtos[i].quantidade);
+					        	  }
+				        	  }
+                } else if (opcao_painel_adm == 0) {
+                    printf("Saindo...\n");
+                } else {
+                    printf("Opção inválida.\n");
+                }
+
+                break;
+
+            case 4:
+                printf("\nExcluir Produto\n");
+
+                // Opção de exclusão por SKU ou por nome
+                printf("\n1- Excluir por SKU\n2- Excluir por nome\n0- Sair\n");
+                scanf("%d", &opcao_painel_adm);
+                fflush(stdin);
+
+                if (opcao_painel_adm == 1) {
+                    int sku_procura;
+                    printf("Digite o SKU = ");
+                    scanf("%d", &sku_procura);
+                    fflush(stdin);
+
+                    // Procurar pelo SKU e excluir
+                    for (int i = 0; i < tam_produto_cadastrado; i++) {
+                        if (produtos[i].sku == sku_procura) {
+                            printf("\nProduto excluído:\n");
+                            printf("Nome = %s\n", produtos[i].nome);
+                            printf("SKU = %d\n", produtos[i].sku);
+                            printf("Quantidade = %d\n", produtos[i].quantidade);
+                            printf("Valor = R$ %.2f\n", produtos[i].valor);
+
+                            // Movendo o último produto para a posição atual e decrementando o contador
+                            produtos[i] = produtos[tam_produto_cadastrado - 1];
+                            tam_produto_cadastrado--;
+
+                            printf("\nProduto excluído com sucesso.\n");
+                            break; // Parar a busca após excluir o produto
+                        }
+                    }
+                } else if (opcao_painel_adm == 2) {
+                    char nome_procura[MAX];
+                    printf("Digite o nome do produto = ");
+                    scanf("%s", nome_procura);
+                    fflush(stdin);
+
+                    // Procurar pelo nome e excluir
+                    for (int i = 0; i < tam_produto_cadastrado; i++) {
+                        if (strcmp(produtos[i].nome, nome_procura) == 0) {
+                            printf("\nProduto excluído:\n");
+                            printf("Nome = %s\n", produtos[i].nome);
+                            printf("SKU = %d\n", produtos[i].sku);
+                            printf("Quantidade = %d\n", produtos[i].quantidade);
+                            printf("Valor = R$ %.2f\n", produtos[i].valor);
+
+                            // Movendo o último produto para a posição atual e decrementando o contador
+                            produtos[i] = produtos[tam_produto_cadastrado - 1];
+                            tam_produto_cadastrado--;
+
+                            printf("\nProduto excluído com sucesso.\n");
+                            break; // Parar a busca após excluir o produto
+                        }
+                    }
+                
+				
+				
+				} else if (opcao_painel_adm == 0) {
+                    printf("Saindo...\n");
+                } else {
+                    printf("Opção inválida.\n");
+                }
+
+                break;
+
+            default:
+                printf("Opção inválida.\n");
+                break;
+        }
+
+    	
+	} while (opcao_painel_adm != 0);
+
+    return 0;
+}
