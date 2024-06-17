@@ -1,0 +1,458 @@
+#include <ncurses.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <locale.h>
+
+#define MAX 30
+
+struct venda {
+    int numero_pedido;
+    float valor;
+};
+
+typedef struct venda venda;
+
+struct produto {
+    int SKU;
+    int id;
+    char nome[MAX];
+    float preco;
+    int estoque;
+};
+
+typedef struct produto produto;
+
+typedef struct {
+    int produtoId;
+    int quantidade;
+} ItemCarrinho;
+
+float valor_total = 0.0; // Variável global para valor total do carrinho.
+float totalComDesconto;  // Variável global para o total com desconto.
+
+void menuAdm();
+void listarProdutos(produto produtos[], int contador_produto);
+float calcularDesconto(float total);
+void adicionarAoCarrinho(ItemCarrinho carrinho[], produto produtos[], int *numItens, int produtoId, int quantidade);
+void exibirCarrinho(ItemCarrinho carrinho[], int numItens, produto produtos[], int numProdutos);
+void editarCarrinho(ItemCarrinho carrinho[], produto produtos[], int numItens);
+void deletarDoCarrinho(ItemCarrinho carrinho[], int *numItens, int produtoId, produto produtos[]);
+void atualizarEstoqueVenda(ItemCarrinho carrinho[], int numItens, produto produtos[], int numProdutos);
+void cadastrarVenda(venda vendas[], int contador_venda, produto produtos[], ItemCarrinho carrinho[], float total, int numItens, int numero_pedido, int numProdutos);
+void zerarCarrinho(ItemCarrinho carrinho[], int *numItens);
+float calcularImposto(float faturamento);
+void visualizarVendas(venda vendas[], int contador_venda);
+void cadastrarProduto(produto produtos[], int contador_produto, int estoque);
+void visualizarProdutos(produto produtos[], int contador_produto);
+void excluirProduto(produto produtos[], int *contador_produto, int id);
+void editarProduto(produto produtos[], int busca_id);
+
+// Funções para exibição de telas
+void exibir_tela_login();
+void exibir_menu_admin();
+void exibir_menu_usuario();
+void exibir_carrinho();
+
+produto produtos[10];
+ItemCarrinho carrinho[10];
+venda vendas[10];
+
+int contador_produto = 0;
+int numItens = 0;
+int contador_venda = 0;
+int numPedido = 1;
+
+int main() {
+    setlocale(LC_ALL, "Portuguese");
+
+    initscr();          // Inicializa a tela
+    cbreak();           // Desabilita o buffer de linha
+    noecho();           // Não mostra os caracteres digitados no terminal
+
+    exibir_tela_login(); // Exibe a tela de login inicial
+
+    endwin();           // Restaura o terminal padrão
+    return 0;           // Encerra o programa
+}
+
+void exibir_tela_login() {
+    int escolha;        // Armazena a escolha do usuário
+    const char *opcoes[] = {
+        "1. Acessar como administrador",
+        "2. Acessar como usuário",
+        "3. Sair"
+    };
+    int n_opcoes = sizeof(opcoes) / sizeof(opcoes[0]); // Número de opções
+
+    while (1) {
+        clear();        // Limpa a tela
+        box(stdscr, 0, 0); // Desenha a borda ao redor da tela
+        mvprintw(1, (COLS - strlen("Nome da loja")) / 2, "Nome da loja"); // Centraliza e imprime o nome da loja
+
+        for (int i = 0; i < n_opcoes; ++i) {
+            mvprintw(3 + 2*i, (COLS - strlen(opcoes[i])) / 2, "%s", opcoes[i]); // Imprime a opção
+        }
+
+        refresh();      // Atualiza a tela
+        mvprintw(LINES - 1, 0, "Escolha uma opção: "); // Solicita a escolha do usuário
+        echo();         // Habilita a exibição da entrada do usuário
+        scanw("%d", &escolha); // Captura a escolha do usuário
+        noecho();       // Desabilita a exibição da entrada do usuário
+
+        switch(escolha) {
+            case 1:
+                exibir_menu_admin(); // Exibe o menu admin
+                break;
+            case 2:
+                exibir_menu_usuario(); // Exibe o menu usuário
+                break;
+            case 3:
+                return; // Sai do programa
+            default:
+                mvprintw(LINES - 2, 0, "Opção inválida, tente novamente."); // Mensagem de erro
+                break;
+        }
+    }
+}
+
+void exibir_menu_admin() {
+    int escolha;        // Armazena a escolha do usuário
+    const char *opcoes[] = {
+        "1. Cadastro de produtos",
+        "2. Visualizar produtos",
+        "3. Visualizar vendas",
+        "4. Voltar"
+    };
+    int n_opcoes = sizeof(opcoes) / sizeof(opcoes[0]); // Número de opções
+
+    while (1) {
+        clear();        // Limpa a tela
+        box(stdscr, 0, 0); // Desenha a borda ao redor da tela
+        mvprintw(1, (COLS - strlen("Menu admin")) / 2, "Menu admin"); // Centraliza e imprime o título
+
+        for (int i = 0; i < n_opcoes; ++i) {
+            mvprintw(3 + 2*i, 5, "%s", opcoes[i]); // Imprime a opção
+        }
+
+        refresh();      // Atualiza a tela
+        mvprintw(LINES - 1, 0, "Escolha uma opção: "); // Solicita a escolha do usuário
+        echo();         // Habilita a exibição da entrada do usuário
+        scanw("%d", &escolha); // Captura a escolha do usuário
+        noecho();       // Desabilita a exibição da entrada do usuário
+
+        switch(escolha) {
+            case 1:
+                clear();
+                box(stdscr, 0, 0);
+                cadastrarProduto(produtos, contador_produto, 0);
+                contador_produto++;
+                break;
+            case 2:
+                clear();
+                box(stdscr, 0, 0);
+                visualizarProdutos(produtos, contador_produto);
+                getch();
+                break;
+            case 3:
+                clear();
+                box(stdscr, 0, 0);
+                visualizarVendas(vendas, contador_venda);
+                getch();
+                break;
+            case 4:
+                return; // Volta para a tela de login
+            default:
+                mvprintw(LINES - 2, 0, "Opção inválida, tente novamente."); // Mensagem de erro
+                break;
+        }
+    }
+}
+
+void exibir_menu_usuario() {
+    int escolha;        // Armazena a escolha do usuário
+    const char *opcoes[] = {
+        "1. Apresentar todos os produtos cadastrados",
+        "2. Adicionar produtos ao carrinho",
+        "3. Exibir carrinho",
+        "4. Voltar"
+    };
+    int n_opcoes = sizeof(opcoes) / sizeof(opcoes[0]); // Número de opções
+
+    while (1) {
+        clear();        // Limpa a tela
+        box(stdscr, 0, 0); // Desenha a borda ao redor da tela
+        mvprintw(1, (COLS - strlen("Menu usuário")) / 2, "Menu usuário"); // Centraliza e imprime o título
+
+        for (int i = 0; i < n_opcoes; ++i) {
+            mvprintw(3 + 2*i, 5, "%s", opcoes[i]); // Imprime a opção
+        }
+
+        refresh();      // Atualiza a tela
+        mvprintw(LINES - 1, 0, "Escolha uma opção: "); // Solicita a escolha do usuário
+        echo();         // Habilita a exibição da entrada do usuário
+        scanw("%d", &escolha); // Captura a escolha do usuário
+        noecho();       // Desabilita a exibição da entrada do usuário
+
+        switch(escolha) {
+            case 1:
+                clear();
+                box(stdscr, 0, 0);
+                listarProdutos(produtos, contador_produto);
+                getch();
+                break;
+            case 2:
+                clear();
+                box(stdscr, 0, 0);
+                int produtoId, quantidade;
+                listarProdutos(produtos, contador_produto);
+                mvprintw(LINES - 3, 0, "Digite o ID do produto que deseja adicionar: ");
+                echo();
+                scanw("%d", &produtoId);
+                noecho();
+                mvprintw(LINES - 2, 0, "Digite a quantidade: ");
+                echo();
+                scanw("%d", &quantidade);
+                noecho();
+                adicionarAoCarrinho(carrinho, produtos, &numItens, produtoId, quantidade);
+                break;
+            case 3:
+                exibir_carrinho(); // Exibe o carrinho
+                break;
+            case 4:
+                return; // Volta para a tela de login
+            default:
+                mvprintw(LINES - 2, 0, "Opção inválida, tente novamente."); // Mensagem de erro
+                break;
+        }
+    }
+}
+
+void exibir_carrinho() {
+    int escolha;        // Armazena a escolha do usuário
+    const char *opcoes[] = {
+        "1. Exibir carrinho",
+        "2. Editar carrinho",
+        "3. Deletar do carrinho",
+        "4. Finalizar compra",
+        "5. Voltar"
+    };
+    int n_opcoes = sizeof(opcoes) / sizeof(opcoes[0]); // Número de opções
+
+    while (1) {
+        clear();        // Limpa a tela
+        box(stdscr, 0, 0); // Desenha a borda ao redor da tela
+        mvprintw(1, (COLS - strlen("Menu carrinho")) / 2, "Menu carrinho"); // Centraliza e imprime o título
+
+        for (int i = 0; i < n_opcoes; ++i) {
+            mvprintw(3 + 2*i, 5, "%s", opcoes[i]); // Imprime a opção
+        }
+
+        refresh();      // Atualiza a tela
+        mvprintw(LINES - 1, 0, "Escolha uma opção: "); // Solicita a escolha do usuário
+        echo();         // Habilita a exibição da entrada do usuário
+        scanw("%d", &escolha); // Captura a escolha do usuário
+        noecho();       // Desabilita a exibição da entrada do usuário
+
+        switch(escolha) {
+            case 1:
+                clear();
+                box(stdscr, 0, 0);
+                exibirCarrinho(carrinho, numItens, produtos, contador_produto);
+                getch();
+                break;
+            case 2:
+                clear();
+                box(stdscr, 0, 0);
+                editarCarrinho(carrinho, produtos, numItens);
+                break;
+            case 3:
+                clear();
+                box(stdscr, 0, 0);
+                int produtoId;
+                mvprintw(LINES - 3, 0, "Digite o ID do produto que deseja remover: ");
+                echo();
+                scanw("%d", &produtoId);
+                noecho();
+                deletarDoCarrinho(carrinho, &numItens, produtoId, produtos);
+                break;
+            case 4:
+                clear();
+                box(stdscr, 0, 0);
+                atualizarEstoqueVenda(carrinho, numItens, produtos, contador_produto);
+                cadastrarVenda(vendas, contador_venda, produtos, carrinho, valor_total, numItens, numPedido, contador_produto);
+                numPedido++;
+                contador_venda++;
+                zerarCarrinho(carrinho, &numItens);
+                break;
+            case 5:
+                return; // Volta para o menu usuário
+            default:
+                mvprintw(LINES - 2, 0, "Opção inválida, tente novamente."); // Mensagem de erro
+                break;
+        }
+    }
+}
+
+void listarProdutos(produto produtos[], int contador_produto) {
+    for (int i = 0; i < contador_produto; i++) {
+        mvprintw(3 + i, 5, "ID: %d | Nome: %s | Preço: %.2f | Estoque: %d", produtos[i].id, produtos[i].nome, produtos[i].preco, produtos[i].estoque);
+    }
+}
+
+// Funções do backend fornecidas
+
+void cadastrarProduto(produto produtos[], int contador_produto, int estoque) {
+    produto novoProduto;
+    novoProduto.id = contador_produto + 1;
+    echo();
+    mvprintw(LINES - 5, 0, "Digite o nome do produto: ");
+    scanw("%s", novoProduto.nome);
+    mvprintw(LINES - 4, 0, "Digite o preço do produto: ");
+    scanw("%f", &novoProduto.preco);
+    mvprintw(LINES - 3, 0, "Digite o estoque do produto: ");
+    scanw("%d", &novoProduto.estoque);
+    noecho();
+    produtos[contador_produto] = novoProduto;
+}
+
+void visualizarProdutos(produto produtos[], int contador_produto) {
+    for (int i = 0; i < contador_produto; i++) {
+        mvprintw(3 + i, 5, "ID: %d | Nome: %s | Preço: %.2f | Estoque: %d", produtos[i].id, produtos[i].nome, produtos[i].preco, produtos[i].estoque);
+    }
+}
+
+void excluirProduto(produto produtos[], int *contador_produto, int id) {
+    for (int i = 0; i < *contador_produto; i++) {
+        if (produtos[i].id == id) {
+            for (int j = i; j < *contador_produto - 1; j++) {
+                produtos[j] = produtos[j + 1];
+            }
+            (*contador_produto)--;
+            break;
+        }
+    }
+}
+
+void editarProduto(produto produtos[], int busca_id) {
+    for (int i = 0; i < contador_produto; i++) {
+        if (produtos[i].id == busca_id) {
+            echo();
+            mvprintw(LINES - 5, 0, "Digite o novo nome do produto: ");
+            scanw("%s", produtos[i].nome);
+            mvprintw(LINES - 4, 0, "Digite o novo preço do produto: ");
+            scanw("%f", &produtos[i].preco);
+            mvprintw(LINES - 3, 0, "Digite o novo estoque do produto: ");
+            scanw("%d", &produtos[i].estoque);
+            noecho();
+            break;
+        }
+    }
+}
+
+void visualizarVendas(venda vendas[], int contador_venda) {
+    for (int i = 0; i < contador_venda; i++) {
+        mvprintw(3 + i, 5, "Número do pedido: %d | Valor: %.2f", vendas[i].numero_pedido, vendas[i].valor);
+    }
+}
+
+void adicionarAoCarrinho(ItemCarrinho carrinho[], produto produtos[], int *numItens, int produtoId, int quantidade) {
+    for (int i = 0; i < contador_produto; i++) {
+        if (produtos[i].id == produtoId) {
+            carrinho[*numItens].produtoId = produtoId;
+            carrinho[*numItens].quantidade = quantidade;
+            valor_total += produtos[i].preco * quantidade;
+            (*numItens)++;
+            break;
+        }
+    }
+}
+
+void exibirCarrinho(ItemCarrinho carrinho[], int numItens, produto produtos[], int numProdutos) {
+    for (int i = 0; i < numItens; i++) {
+        for (int j = 0; j < numProdutos; j++) {
+            if (produtos[j].id == carrinho[i].produtoId) {
+                mvprintw(3 + i, 5, "ID: %d | Nome: %s | Preço: %.2f | Quantidade: %d", produtos[j].id, produtos[j].nome, produtos[j].preco, carrinho[i].quantidade);
+                break;
+            }
+        }
+    }
+    mvprintw(LINES - 5, 0, "Total: %.2f", valor_total);
+}
+
+void editarCarrinho(ItemCarrinho carrinho[], produto produtos[], int numItens) {
+    int produtoId, novaQuantidade;
+    mvprintw(LINES - 3, 0, "Digite o ID do produto que deseja editar: ");
+    echo();
+    scanw("%d", &produtoId);
+    noecho();
+    mvprintw(LINES - 2, 0, "Digite a nova quantidade: ");
+    echo();
+    scanw("%d", &novaQuantidade);
+    noecho();
+    for (int i = 0; i < numItens; i++) {
+        if (carrinho[i].produtoId == produtoId) {
+            for (int j = 0; j < contador_produto; j++) {
+                if (produtos[j].id == produtoId) {
+                    valor_total -= produtos[j].preco * carrinho[i].quantidade;
+                    carrinho[i].quantidade = novaQuantidade;
+                    valor_total += produtos[j].preco * novaQuantidade;
+                    break;
+                }
+            }
+            break;
+        }
+    }
+}
+
+void deletarDoCarrinho(ItemCarrinho carrinho[], int *numItens, int produtoId, produto produtos[]) {
+    for (int i = 0; i < *numItens; i++) {
+        if (carrinho[i].produtoId == produtoId) {
+            for (int j = 0; j < contador_produto; j++) {
+                if (produtos[j].id == produtoId) {
+                    valor_total -= produtos[j].preco * carrinho[i].quantidade;
+                    break;
+                }
+            }
+            for (int j = i; j < *numItens - 1; j++) {
+                carrinho[j] = carrinho[j + 1];
+            }
+            (*numItens)--;
+            break;
+        }
+    }
+}
+
+void atualizarEstoqueVenda(ItemCarrinho carrinho[], int numItens, produto produtos[], int numProdutos) {
+    for (int i = 0; i < numItens; i++) {
+        for (int j = 0; j < numProdutos; j++) {
+            if (produtos[j].id == carrinho[i].produtoId) {
+                produtos[j].estoque -= carrinho[i].quantidade;
+                break;
+            }
+        }
+    }
+}
+
+void cadastrarVenda(venda vendas[], int contador_venda, produto produtos[], ItemCarrinho carrinho[], float total, int numItens, int numero_pedido, int numProdutos) {
+    vendas[contador_venda].numero_pedido = numero_pedido;
+    vendas[contador_venda].valor = total;
+    atualizarEstoqueVenda(carrinho, numItens, produtos, numProdutos);
+}
+
+void zerarCarrinho(ItemCarrinho carrinho[], int *numItens) {
+    *numItens = 0;
+    valor_total = 0.0;
+}
+
+float calcularDesconto(float total) {
+    return total * 0.9;
+}
+
+float calcularImposto(float faturamento) {
+    return faturamento * 0.15;
+}
+
+
+
+
