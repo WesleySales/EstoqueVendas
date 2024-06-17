@@ -1,0 +1,457 @@
+#include <stdio.h>
+#include <locale.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define MAX 30
+
+struct venda {
+    int numero_pedido;
+    float valor;
+};
+
+typedef struct venda venda;
+
+struct produto {
+    int SKU;
+    int id;
+    char nome[MAX];
+    float preco;
+    int estoque;
+};
+
+typedef struct produto produto;
+
+typedef struct {
+    int produtoId;
+    int quantidade;
+} ItemCarrinho;
+
+float valor_total = 0.0; // Variável global para valor total do carrinho.
+
+void menuAdm() {
+    printf("MENU DO ADMINISTRADOR\n");
+    printf("1. CADASTRAR PRODUTO. \n");
+    printf("2. VISUALIZAR PRODUTOS CADASTRADOS.\n");
+    printf("3. MENU CLIENTE TEMPORARIO\n");
+    printf("4. ENCERRAR SESSAO\n");
+    printf("5. EDITAR PRODUTOS\n");
+    printf("6. VISUALIZAR VENDAS\n");
+    printf("\nESCOLHA UMA DAS OPCOES: ");
+}
+
+// Exibir produtos para os clientes, apenas nome e preço
+void listarProdutos(produto produtos[], int contador_produto) {
+    printf("*LOJA PURO VOODOO*\n");
+
+    for (int i = 0; i < contador_produto; i++) {
+        printf("________________\n");
+        printf("\nProduto %d: %s\n", i + 1, produtos[i].nome);
+        printf("Preço: R$ %.2lf\n", produtos[i].preco);
+        printf("Quantidade disponível: %d UN\n", produtos[i].estoque);
+    }
+}
+
+// Função para calcular o desconto com base no valor total do carrinho.
+float calcularDesconto(float total) {
+    if (total >= 500) {
+        total -= total * 0.20;
+    } else if (total >= 150) {
+        total -= total * 0.15;
+    }
+    return total;
+}
+
+// Variável global para o total com desconto
+float totalComDesconto;
+
+// Função para adicionar produtos ao carrinho
+void adicionarAoCarrinho(ItemCarrinho carrinho[], produto produtos[], int *numItens, int produtoId, int quantidade) {
+    int itemExistente = -1;
+
+    for (int i = 0; i < *numItens; i++) {
+        if (carrinho[i].produtoId == produtoId) {
+            itemExistente = i;
+            break;
+        }
+    }
+
+    if (itemExistente != -1) {
+        // Se o item já estiver no carrinho, apenas atualiza a quantidade
+        carrinho[itemExistente].quantidade += quantidade;
+    } else {
+        // Se o item não estiver no carrinho, adiciona um novo item
+        carrinho[*numItens].produtoId = produtoId;
+        carrinho[*numItens].quantidade = quantidade;
+        (*numItens)++;
+    }
+
+    // Atualiza o valor total do carrinho sempre que um produto é adicionado
+    for (int j = 0; j < 10; j++) {
+        if (produtos[j].id == produtoId) {
+            valor_total += produtos[j].preco * quantidade;
+            break;
+        }
+    }
+    totalComDesconto = calcularDesconto(valor_total);
+}
+
+// Função para exibir o carrinho
+void exibirCarrinho(ItemCarrinho carrinho[], int numItens, produto produtos[], int numProdutos) {
+    printf("Carrinho de Compras:\n\n");
+
+    for (int i = 0; i < numItens; i++) {
+        int produtoId = carrinho[i].produtoId;
+        int quantidade = carrinho[i].quantidade;
+
+        // Encontra o produto pelo ID
+        for (int j = 0; j < numProdutos; j++) {
+            if (produtos[j].id == produtoId) {
+                float precoTotal = produtos[j].preco * quantidade;
+                printf("ID %d  -  Produto: %s - Qtd: %d  -  Preço Und: %.2lf  -  Preço Total: %.2lf\n",
+                       produtos[j].id, produtos[j].nome, quantidade, produtos[j].preco, precoTotal);
+                break;
+            }
+        }
+    }
+    printf("\nValor total do carrinho: R$ %.2lf\n", valor_total);
+    printf("\nDesconto aplicado...\nValor total: R$ %.2lf\n\n", totalComDesconto);
+}
+
+// Função para editar os produtos dentro do carrinho
+void editarCarrinho(ItemCarrinho carrinho[], produto produtos[], int numItens) {
+    int edit_carrinho;
+    int edit_quantidade;
+    printf("Escolha o produto que deseja editar (ID): ");
+    scanf("%d", &edit_carrinho);
+
+    for (int j = 0; j < numItens; j++) {
+        if (edit_carrinho == carrinho[j].produtoId) {
+            printf("Editando produto: %s \n", produtos[edit_carrinho - 1].nome);
+            printf("Quantidade atual: %d \n", carrinho[j].quantidade);
+            printf("Altere a quantidade: ");
+            scanf("%d", &edit_quantidade);
+            carrinho[j].quantidade = edit_quantidade;
+        }
+    }
+}
+
+// Função para deletar um produto do carrinho
+void deletarDoCarrinho(ItemCarrinho carrinho[], int *numItens, int produtoId, produto produtos[]) {
+    for (int i = 0; i < *numItens; i++) {
+        if (carrinho[i].produtoId == produtoId) {
+            // Atualiza o valor total do carrinho
+            for (int j = 0; j < 10; j++) {
+                if (produtos[j].id == produtoId) {
+                    valor_total -= produtos[j].preco * carrinho[i].quantidade;
+                    break;
+                }
+            }
+
+            // Remove o produto do carrinho
+            for (int j = i; j < (*numItens) - 1; j++) {
+                carrinho[j] = carrinho[j + 1];
+            }
+            (*numItens)--;
+            totalComDesconto = calcularDesconto(valor_total);
+            break;
+        }
+    }
+}
+
+// Função para atualizar o estoque quando a venda é realizada
+void atualizarEstoqueVenda(ItemCarrinho carrinho[], int numItens, produto produtos[], int numProdutos) {
+    for (int i = 0; i < numItens; i++) {
+        int produtoId = carrinho[i].produtoId;
+        int quantidade = carrinho[i].quantidade;
+
+        for (int j = 0; j < numProdutos; j++) {
+            if (produtos[j].id == produtoId) {
+                produtos[j].estoque -= quantidade;
+                break;
+            }
+        }
+    }
+}
+
+// Função para cadastro das vendas
+void cadastrarVenda(venda vendas[], int contador_venda, produto produtos[], ItemCarrinho carrinho[], float total, int numItens, int numero_pedido, int numProdutos) {
+    vendas[contador_venda].numero_pedido = numero_pedido;
+    vendas[contador_venda].valor = totalComDesconto;
+
+    printf("COMPRA CONCLUÍDA\n\n");
+
+    printf("ID DA VENDA: %d\n", vendas[contador_venda].numero_pedido);
+    printf("Valor total: R$ %.2lf\n", vendas[contador_venda].valor);
+
+    atualizarEstoqueVenda(carrinho, numItens, produtos, numProdutos);
+    valor_total = 0.0; // Zera o valor total global
+}
+
+// Função para zerar o carrinho
+void zerarCarrinho(ItemCarrinho carrinho[], int *numItens) {
+    *numItens = 0; // Zera a quantidade de itens no carrinho
+}
+
+float calcularImposto(float faturamento) {
+    float imposto = faturamento * 0.08;
+    return imposto;
+}
+
+// Função para visualizar as vendas cadastradas
+void visualizarVendas(venda vendas[], int contador_venda) {
+    float faturamento = 0.0;
+    for (int i = 0; i < contador_venda; i++) {
+        printf("ID DA VENDA: %d  - Valor total: R$ %.2lf\n", vendas[i].numero_pedido, vendas[i].valor);
+        faturamento += vendas[i].valor;
+    }
+    printf("FATURAMENTO: R$ %.2lf\n", faturamento);
+    printf("Imposto: R$ %.2lf\n", calcularImposto(faturamento));
+}
+
+// Função para cadastrar produtos
+void cadastrarProduto(produto produtos[], int contador_produto, int estoque) {
+    printf("\nCADASTRO DE PRODUTOS: \n");
+    printf("Produto: ");
+    scanf("%s", produtos[contador_produto].nome);
+    printf("Preço: ");
+    scanf("%f", &produtos[contador_produto].preco);
+    printf("Estoque: ");
+    scanf("%d", &estoque);
+    produtos[contador_produto].estoque = estoque;
+    produtos[contador_produto].SKU = 20161 + contador_produto;
+    produtos[contador_produto].id = contador_produto + 1;
+}
+
+// Exibir produtos e todos seus atributos para o administrador
+void visualizarProdutos(produto produtos[], int contador_produto) {
+    for (int i = 0; i < contador_produto; i++) {
+        printf("________________\n");
+        printf("\nID %d\nProduto: %s\nPreço: R$ %.2lf\nEstoque: %d UN\nSKU: %d\n", produtos[i].id, produtos[i].nome, produtos[i].preco, produtos[i].estoque, produtos[i].SKU);
+    }
+}
+
+// Função para excluir um produto
+void excluirProduto(produto produtos[], int *contador_produto, int id) {
+    for (int i = 0; i < *contador_produto; i++) {
+        if (produtos[i].id == id) {
+            produtos[i] = produtos[*contador_produto - 1]; // Substitui pelo último produto
+            (*contador_produto)--; // Decrementa o contador de produtos
+            break;
+        }
+    }
+}
+
+// Função para editar produto
+void editarProduto(produto produtos[], int busca_id) {
+    int editar_estoque;
+    float editar_preco;
+    for (int i = 0; i < 10; i++) {
+        if (produtos[i].id == busca_id) {
+            printf("\nPRODUTO ENCONTRADO: %s\n", produtos[i].nome);
+            printf("VALOR ATUAL: %.2lf\n", produtos[i].preco);
+            printf("QUANTIDADE EM ESTOQUE: %d\n", produtos[i].estoque);
+            printf("EDITAR VALOR PARA: ");
+            scanf("%f", &editar_preco);
+            printf("EDITAR QUANTIDADE PARA: ");
+            scanf("%d", &editar_estoque);
+            produtos[i].preco = editar_preco;
+            produtos[i].estoque = editar_estoque;
+        }
+    }
+}
+
+int main() {
+    setlocale(LC_ALL, "Portuguese");
+
+    produto produtos[10];
+    ItemCarrinho carrinho[10];
+    venda vendas[10];
+
+    int opcao, contador_produto = 0, opcao_cliente, opcao_carrinho, numItens = 0, contador_venda = 0;
+    int numPedido = 1;
+    int busca_id, estoque = 0;
+    char senha[10];
+
+    while (1) {
+        printf("\nMENU PRINCIPAL\n");
+        printf("1. ADMINISTRADOR\n");
+        printf("2. CLIENTE\n");
+        printf("3. SAIR\n");
+        printf("Escolha uma opção: ");
+        scanf("%d", &opcao);
+
+        switch (opcao) {
+            case 1:
+                printf("Digite a senha de administrador: ");
+                scanf("%s", senha);
+
+                if (strcmp(senha, "1234") == 0) {
+                    int opcao_adm;
+                    do {
+                        menuAdm();
+                        scanf("%d", &opcao_adm);
+
+                        switch (opcao_adm) {
+                            case 1:
+                                cadastrarProduto(produtos, contador_produto, estoque);
+                                contador_produto++;
+                                break;
+
+                            case 2:
+                                visualizarProdutos(produtos, contador_produto);
+                                break;
+
+                            case 3:
+                                do {
+                                    listarProdutos(produtos, contador_produto);
+                                    printf("MENU CLIENTE\n");
+                                    printf("1. Adicionar produto ao carrinho\n");
+                                    printf("2. Visualizar carrinho\n");
+                                    printf("3. Editar carrinho\n");
+                                    printf("4. Deletar produto do carrinho\n");
+                                    printf("5. Finalizar compra\n");
+                                    printf("6. Voltar ao menu principal\n");
+                                    printf("Escolha uma opção: ");
+                                    scanf("%d", &opcao_cliente);
+
+                                    switch (opcao_cliente) {
+                                        case 1:
+                                            listarProdutos(produtos, contador_produto);
+                                            printf("Digite o ID do produto que deseja adicionar: ");
+                                            int produtoId;
+                                            scanf("%d", &produtoId);
+                                            printf("Digite a quantidade: ");
+                                            int quantidade;
+                                            scanf("%d", &quantidade);
+                                            adicionarAoCarrinho(carrinho, produtos, &numItens, produtoId, quantidade);
+                                            break;
+
+                                        case 2:
+                                            exibirCarrinho(carrinho, numItens, produtos, contador_produto);
+                                            break;
+
+                                        case 3:
+                                            exibirCarrinho(carrinho, numItens, produtos, contador_produto);
+                                            editarCarrinho(carrinho, produtos, numItens);
+                                            exibirCarrinho(carrinho, numItens, produtos, contador_produto);
+                                            break;
+
+                                        case 4:
+                                            exibirCarrinho(carrinho, numItens, produtos, contador_produto);
+                                            printf("Digite o ID do produto que deseja deletar: ");
+                                            int produtoDelId;
+                                            scanf("%d", &produtoDelId);
+                                            deletarDoCarrinho(carrinho, &numItens, produtoDelId, produtos);
+                                            exibirCarrinho(carrinho, numItens, produtos, contador_produto);
+                                            break;
+
+                                        case 5:
+                                            if (numItens == 0) {
+                                                printf("Carrinho vazio. Não é possível finalizar a compra.\n");
+                                            } else {
+                                                cadastrarVenda(vendas, contador_venda, produtos, carrinho, valor_total, numItens, numPedido, contador_produto);
+                                                numPedido++;
+                                                contador_venda++;
+                                                zerarCarrinho(carrinho, &numItens);
+                                            }
+                                            break;
+                                    }
+                                } while (opcao_cliente != 6);
+                                break;
+
+                            case 4:
+                                printf("Encerrando sessão do administrador...\n");
+                                break;
+
+                            case 5:
+                                printf("EDITAR PRODUTO:\n");
+                                visualizarProdutos(produtos, contador_produto);
+                                printf("DIGITE O ID DO PRODUTO QUE DESEJA EDITAR: ");
+                                scanf("%d", &busca_id);
+                                editarProduto(produtos, busca_id);
+                                break;
+
+                            case 6:
+                                printf("VISUALIZAR VENDAS:\n");
+                                visualizarVendas(vendas, contador_venda);
+                                break;
+
+                            default:
+                                printf("Opção inválida. Tente novamente.\n");
+                        }
+                    } while (opcao_adm != 4);
+                } else {
+                    printf("Senha incorreta. Tente novamente.\n");
+                }
+                break;
+
+            case 2:
+                do {
+                    listarProdutos(produtos, contador_produto);
+                    printf("MENU CLIENTE\n");
+                    printf("1. Adicionar produto ao carrinho\n");
+                    printf("2. Visualizar carrinho\n");
+                    printf("3. Editar carrinho\n");
+                    printf("4. Deletar produto do carrinho\n");
+                    printf("5. Finalizar compra\n");
+                    printf("6. Voltar ao menu principal\n");
+                    printf("Escolha uma opção: ");
+                    scanf("%d", &opcao_cliente);
+
+                    switch (opcao_cliente) {
+                        case 1:
+                            listarProdutos(produtos, contador_produto);
+                            printf("Digite o ID do produto que deseja adicionar: ");
+                            int produtoId;
+                            scanf("%d", &produtoId);
+                            printf("Digite a quantidade: ");
+                            int quantidade;
+                            scanf("%d", &quantidade);
+                            adicionarAoCarrinho(carrinho, produtos, &numItens, produtoId, quantidade);
+                            break;
+
+                        case 2:
+                            exibirCarrinho(carrinho, numItens, produtos, contador_produto);
+                            break;
+
+                        case 3:
+                            exibirCarrinho(carrinho, numItens, produtos, contador_produto);
+                            editarCarrinho(carrinho, produtos, numItens);
+                            exibirCarrinho(carrinho, numItens, produtos, contador_produto);
+                            break;
+
+                        case 4:
+                            exibirCarrinho(carrinho, numItens, produtos, contador_produto);
+                            printf("Digite o ID do produto que deseja deletar: ");
+                            int produtoDelId;
+                            scanf("%d", &produtoDelId);
+                            deletarDoCarrinho(carrinho, &numItens, produtoDelId, produtos);
+                            exibirCarrinho(carrinho, numItens, produtos, contador_produto);
+                            break;
+
+                        case 5:
+                            if (numItens == 0) {
+                                printf("Carrinho vazio. Não é possível finalizar a compra.\n");
+                            } else {
+                                cadastrarVenda(vendas, contador_venda, produtos, carrinho, valor_total, numItens, numPedido, contador_produto);
+                                numPedido++;
+                                contador_venda++;
+                                zerarCarrinho(carrinho, &numItens);
+                            }
+                            break;
+                    }
+                } while (opcao_cliente != 6);
+                break;
+
+            case 3:
+                printf("Saindo do programa...\n");
+                return 0;
+
+            default:
+                printf("Opção inválida. Tente novamente.\n");
+        }
+    }
+
+    return 0;
+}
